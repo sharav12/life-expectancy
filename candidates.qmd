@@ -15,18 +15,46 @@ library(tidymodels)
 library(broom)
 library(ggplot2)
 library(gt)
+library(modelsummary)
+```
 
-# Display regression formula
+```{r}
+# Fit linear regression model (needed before plotting)
+fit_years <- linear_reg() |>
+  fit(lived_after ~ sex + election_age + sex * election_age, data = x)
+```
+
+```{r}
+# Plot model predictions by election_age and sex (graphic first)
+plot_predictions(fit_years$fit, by = c("election_age", "sex")) +
+  labs(
+    title = "Predicted Years Lived After Election",
+    x = "Election Age",
+    y = "Predicted Years",
+    color = "Sex"
+  ) +
+  theme_minimal()
+```
+
+## Interpretation
+
+If you're curious about how long governors tend to live after their election — based on their sex and age at the time — we're modeling that here.
+
+Our data comes from [Harvard Dataverse](https://doi.org/10.7910/DVN/IBKYRX). We're exploring how lifespan **after election** varies depending on **when** someone was elected and their **sex**.
+
+Note: sex-based differences in lifespan and political participation may influence the model. For example, fewer women in earlier elections could make the interaction between sex and age more complex or skewed.
+
+```{r}
+# Display regression formula (math)
 plot(1, type = "n", axes = FALSE, xlab = "", ylab = "")
 text(1, 1, expression(mu == beta[0] + beta[1]*X[1] + beta[2]*X[2] + "..."))
+```
 
-# Fit linear regression model
-fit_years <- linear_reg() |>
-  fit(lived_after ~ sex + election_age + sex * election_age, data = x) |>
-  tidy(conf.int = TRUE)
+```{r}
+# Create tidy summary table of model results
+fit_summary <- tidy(fit_years, conf.int = TRUE)
 
-# Display regression results as a formatted table
-fit_years |>
+fit_summary |>
   gt() |>
   tab_header(
     title = "Linear Regression Results",
@@ -37,12 +65,3 @@ fit_years |>
     decimals = 2
   )
 ```
-
-## Interpretation
-
-If you're curious about how long governors tend to live after their election — based on their sex and age at the time — we're modeling that here.
-
-Our data comes from [Harvard Dataverse](https://doi.org/10.7910/DVN/IBKYRX). We're exploring how lifespan **after election** varies depending on **when** someone was elected and their **sex**.
-
-Do note: sex-based differences in lifespan and political participation over time may influence our results. For example, fewer women in earlier elections could make the interaction between sex and age more complex or skewed.
-We model life expectancy (years lived after the election), measured in years, as a linear function of the candidate’s sex, age at election, and their interaction.
