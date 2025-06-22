@@ -6,24 +6,43 @@ author: Sharav Joshi
 execute: 
   echo: false
 ---
+
 ```{r}
+# Load required libraries
 library(tidyverse)
 library(primer.data)
 library(tidymodels)
 library(broom)
 library(ggplot2)
+library(gt)
+
+# Display regression formula
 plot(1, type = "n", axes = FALSE, xlab = "", ylab = "")
 text(1, 1, expression(mu == beta[0] + beta[1]*X[1] + beta[2]*X[2] + "..."))
 
+# Fit linear regression model
+fit_years <- linear_reg() |>
+  fit(lived_after ~ sex + election_age + sex * election_age, data = x) |>
+  tidy(conf.int = TRUE)
 
+# Display regression results as a formatted table
+fit_years |>
+  gt() |>
+  tab_header(
+    title = "Linear Regression Results",
+    subtitle = "Predicting Years Lived After Election"
+  ) |>
+  fmt_number(
+    columns = c(estimate, std.error, statistic, p.value, conf.low, conf.high),
+    decimals = 2
+  )
 ```
 
-```{r}
-fit_years<-linear_reg(engine = "governors")|>
-fit(lived_after ~ sex + election_age + sex*election_age, data = x)|>
-tidy(conf.int = TRUE)
-```
-If you wonder about how long governors tend to live after their election based on their election dates we will talk about that.
+## Interpretation
 
-our data comes from https://doi.org/10.7910/DVN/IBKYRX and our question is how does the lifespan of governors after theve been elected compare to when theve been elected
-our data might be sightly skewed as a woman has a different time in elections the the relations between sex and years lived could be changed
+If you're curious about how long governors tend to live after their election — based on their sex and age at the time — we're modeling that here.
+
+Our data comes from [Harvard Dataverse](https://doi.org/10.7910/DVN/IBKYRX). We're exploring how lifespan **after election** varies depending on **when** someone was elected and their **sex**.
+
+Do note: sex-based differences in lifespan and political participation over time may influence our results. For example, fewer women in earlier elections could make the interaction between sex and age more complex or skewed.
+We model life expectancy (years lived after the election), measured in years, as a linear function of the candidate’s sex, age at election, and their interaction.
