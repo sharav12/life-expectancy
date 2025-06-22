@@ -9,8 +9,20 @@ execute:
 ```{r}
 library(tidyverse)
 library(primer.data)
+library(tidymodels)
+library(broom)
+library(ggplot2)
+plot(1, type = "n", axes = FALSE, xlab = "", ylab = "")
+text(1, 1, expression(mu == beta[0] + beta[1]*X[1] + beta[2]*X[2] + "..."))
+
+
 ```
 
+```{r}
+fit_years<-linear_reg(engine = "governors")|>
+fit(lived_after ~ sex + election_age + sex*election_age, data = x)|>
+tidy(conf.int = TRUE)
+```
 If you wonder about how long governors tend to live after their election based on their election dates we will talk about that.
 
 our data comes from https://doi.org/10.7910/DVN/IBKYRX and our question is how does the lifespan of governors after theve been elected compare to when theve been elected
